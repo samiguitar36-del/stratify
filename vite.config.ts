@@ -1,14 +1,18 @@
-import { resolve } from "node:path";
+import { dirname, resolve } from "path";
+import { fileURLToPath } from "url";
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
+
+const currentFilePath = fileURLToPath(import.meta.url);
+const currentDir = dirname(currentFilePath);
 
 export default defineConfig({
   plugins: [react()],
   build: {
     rollupOptions: {
       input: {
-        landing: resolve(__dirname, "index.html"),
-        app: resolve(__dirname, "app/index.html"),
+        landing: resolve(currentDir, "index.html"),
+        app: resolve(currentDir, "app/index.html"),
       },
     },
   },
