@@ -23,10 +23,10 @@ export function ExportActions({
           disabled={isExporting}
           icon={<FileSpreadsheet className="h-4 w-4" />}
         >
-          {isExporting ? "Exportando..." : "Exportar analisis"}
+          {isExporting ? "Generando..." : "Descargar reporte para cliente"}
         </Button>
         <p className="text-xs text-slate-500">
-          Descarga este analisis para compartir o presentar a un cliente.
+          Genera un reporte listo para compartir o presentar.
         </p>
       </div>
       {onExportComparison ? (
@@ -37,10 +37,10 @@ export function ExportActions({
             disabled={isExporting}
             icon={<Download className="h-4 w-4" />}
           >
-            {isExporting ? "Exportando..." : "Exportar comparacion"}
+            {isExporting ? "Generando..." : "Descargar comparacion"}
           </Button>
           <p className="text-xs text-slate-500">
-            Descarga la comparacion activa para revision ejecutiva o presentacion.
+            Genera un comparativo listo para compartir o presentar.
           </p>
         </div>
       ) : null}

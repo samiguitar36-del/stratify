@@ -1,0 +1,51 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#10243e" />
+      <stop offset="55%" stop-color="#173150" />
+      <stop offset="100%" stop-color="#0d9488" />
+    </linearGradient>
+    <linearGradient id="panel" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="rgba(255,255,255,0.10)" />
+      <stop offset="100%" stop-color="rgba(255,255,255,0.03)" />
+    </linearGradient>
+  </defs>
+
+  <rect width="1200" height="630" fill="url(#bg)" rx="32" />
+  <circle cx="1030" cy="110" r="180" fill="rgba(255,255,255,0.06)" />
+  <circle cx="1140" cy="520" r="220" fill="rgba(255,255,255,0.05)" />
+  <circle cx="120" cy="560" r="160" fill="rgba(255,255,255,0.04)" />
+
+  <rect x="72" y="64" width="1056" height="502" rx="28" fill="url(#panel)" stroke="rgba(255,255,255,0.12)" />
+
+  <rect x="108" y="102" width="144" height="52" rx="16" fill="#ffffff" />
+  <text x="180" y="136" text-anchor="middle" font-family="Manrope, Arial, sans-serif" font-size="24" font-weight="800" fill="#10243e">Stratify</text>
+
+  <text x="108" y="212" font-family="Space Grotesk, Manrope, Arial, sans-serif" font-size="62" font-weight="700" fill="#ffffff">
+    <tspan x="108" dy="0">Toma decisiones</tspan>
+    <tspan x="108" dy="74">financieras y de negocio</tspan>
+    <tspan x="108" dy="74">con claridad</tspan>
+  </text>
+
+  <text x="108" y="454" font-family="Manrope, Arial, sans-serif" font-size="28" font-weight="500" fill="rgba(255,255,255,0.84)">
+    <tspan x="108" dy="0">Analiza creditos, inversiones y escenarios de negocio</tspan>
+    <tspan x="108" dy="42">con una lectura ejecutiva lista para cliente, socio o equipo.</tspan>
+  </text>
+
+  <rect x="108" y="506" width="284" height="54" rx="16" fill="#0d9488" />
+  <text x="250" y="541" text-anchor="middle" font-family="Manrope, Arial, sans-serif" font-size="24" font-weight="700" fill="#ffffff">
+    Plataforma profesional
+  </text>
+
+  <rect x="760" y="172" width="292" height="78" rx="22" fill="rgba(255,255,255,0.10)" stroke="rgba(255,255,255,0.14)" />
+  <text x="792" y="206" font-family="Manrope, Arial, sans-serif" font-size="18" font-weight="600" fill="rgba(255,255,255,0.72)">Lectura ejecutiva</text>
+  <text x="792" y="235" font-family="Manrope, Arial, sans-serif" font-size="26" font-weight="700" fill="#ffffff">Mas claridad para decidir</text>
+
+  <rect x="760" y="276" width="292" height="78" rx="22" fill="rgba(255,255,255,0.10)" stroke="rgba(255,255,255,0.14)" />
+  <text x="792" y="310" font-family="Manrope, Arial, sans-serif" font-size="18" font-weight="600" fill="rgba(255,255,255,0.72)">Comparacion</text>
+  <text x="792" y="339" font-family="Manrope, Arial, sans-serif" font-size="26" font-weight="700" fill="#ffffff">Escenarios con contexto</text>
+
+  <rect x="760" y="380" width="292" height="78" rx="22" fill="rgba(255,255,255,0.10)" stroke="rgba(255,255,255,0.14)" />
+  <text x="792" y="414" font-family="Manrope, Arial, sans-serif" font-size="18" font-weight="600" fill="rgba(255,255,255,0.72)">Reporte</text>
+  <text x="792" y="443" font-family="Manrope, Arial, sans-serif" font-size="26" font-weight="700" fill="#ffffff">Listo para compartir</text>
+</svg>

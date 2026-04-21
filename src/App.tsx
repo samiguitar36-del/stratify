@@ -45,9 +45,16 @@ const getModuleConclusion = (moduleId: string, result: ModuleResult) => {
 
   if (moduleId === "roi") {
     const roi = Number(data.roi ?? 0);
-    return roi > 0
-      ? "Con base en los datos ingresados, este escenario es viable y genera retorno positivo."
-      : "Con base en los datos ingresados, este escenario es riesgoso porque no genera retorno positivo.";
+
+    if (roi >= 25) {
+      return "Este escenario ofrece un retorno atractivo y justifica una revision mas profunda si el riesgo es aceptable para el cliente.";
+    }
+
+    if (roi > 0) {
+      return "La inversion luce viable, aunque el retorno no es sobresaliente. Conviene revisar plazo, aportaciones o riesgo asumido antes de decidir.";
+    }
+
+    return "Con los supuestos actuales, el retorno no compensa el capital comprometido. Lo prudente seria replantear la inversion o ajustar expectativas.";
   }
 
   if (moduleId === "business-feasibility") {
@@ -55,12 +62,44 @@ const getModuleConclusion = (moduleId: string, result: ModuleResult) => {
     const annualReturn = Number(data.annualReturn ?? 0);
 
     if (monthlyProfit <= 0) {
-      return "Con base en los datos ingresados, este escenario no es rentable con los supuestos actuales.";
+      return "Este escenario no sostiene la operacion con los supuestos actuales. Antes de avanzar, conviene ajustar ingresos, costos o el tamano de la inversion.";
     }
 
-    return annualReturn >= 20
-      ? "Con base en los datos ingresados, este escenario es viable y presenta una rentabilidad atractiva."
-      : "Con base en los datos ingresados, este escenario es funcional pero todavia luce riesgoso por su retorno limitado.";
+    if (annualReturn >= 20) {
+      return "El escenario muestra una rentabilidad saludable y da senales de traccion. Puede ser una buena opcion si el cliente esta listo para ejecutar con disciplina.";
+    }
+
+    return "El negocio podria funcionar, pero el retorno aun es moderado. Recomendable afinar costos o acelerar ventas antes de comprometer mas capital.";
+  }
+
+  if (moduleId === "savings") {
+    const gap = Number(data.gap ?? data.shortfall ?? 0);
+
+    if (gap <= 0) {
+      return "La estrategia actual parece suficiente para alcanzar la meta. Mantener consistencia en aportaciones sera mas importante que asumir riesgo extra.";
+    }
+
+    return "Con el ritmo actual todavia existe una brecha frente a la meta. Considera aumentar aportaciones, extender el plazo o ajustar el objetivo.";
+  }
+
+  if (moduleId === "travel-budget") {
+    const remaining = Number(data.remainingBudget ?? data.bufferLeft ?? 0);
+
+    if (remaining >= 0) {
+      return "El viaje se mantiene dentro del presupuesto y deja cierto margen para imprevistos. Es un escenario razonablemente controlado.";
+    }
+
+    return "El plan actual rebasa el presupuesto. Lo recomendable es recortar categorias opcionales antes de confirmar gastos.";
+  }
+
+  if (moduleId === "break-even") {
+    const projectedProfit = Number(data.projectedProfit ?? 0);
+
+    if (projectedProfit > 0) {
+      return "El volumen proyectado supera el punto de equilibrio y deja utilidad estimada. Aun asi, conviene validar que la demanda sea realista.";
+    }
+
+    return "Con el volumen actual, el negocio todavia no cubre su estructura de costos. La decision deberia esperar hasta fortalecer precio, margen o demanda.";
   }
 
   if (
@@ -75,12 +114,18 @@ const getModuleConclusion = (moduleId: string, result: ModuleResult) => {
     );
     const ratio = baseAmount > 0 ? financeCost / baseAmount : 0;
 
-    return ratio > 0.8
-      ? "Con base en los datos ingresados, este escenario es riesgoso por el peso del costo financiero sobre el capital principal."
-      : "Con base en los datos ingresados, este escenario es viable y mantiene una estructura financiera manejable.";
+    if (ratio > 0.8) {
+      return "Este escenario es posible, pero el costo financiero es alto. Valdria la pena reducir plazo, mejorar enganche o buscar una tasa mas competitiva.";
+    }
+
+    if (ratio > 0.45) {
+      return "El financiamiento luce manejable, aunque ya implica un costo relevante. Es una opcion razonable si el flujo mensual del cliente puede sostenerla con holgura.";
+    }
+
+    return "El escenario mantiene un costo financiero controlado frente al capital solicitado. Se percibe como una opcion mas estable y defendible.";
   }
 
-  return `Con base en los datos ingresados, ${result.status.charAt(0).toLowerCase()}${result.status.slice(1)}.`;
+  return `Este escenario requiere validacion ejecutiva adicional, pero la lectura inicial sugiere que ${result.status.charAt(0).toLowerCase()}${result.status.slice(1)}.`;
 };
 
 const buildScenarioName = (moduleName: string, scenarioCount: number) =>
@@ -165,19 +210,19 @@ function App() {
         helper: "Vision consolidada de compromisos recurrentes para priorizar decisiones.",
       },
       {
-        label: "Meta de ahorro",
+        label: "Brecha de ahorro",
         value: formatCurrency(savingsGap),
-        helper: "Brecha o excedente frente al objetivo patrimonial trazado.",
+        helper: "Muestra si el plan actual alcanza para llegar a la meta patrimonial.",
       },
       {
-        label: "Negocio preevaluado",
+        label: "Lectura del negocio",
         value: businessStatus,
-        helper: "Diagnostico ejecutivo a partir de ingresos y costos estimados.",
+        helper: "Senal ejecutiva de rentabilidad inicial segun ingresos y costos esperados.",
       },
       {
-        label: "Utilidad por volumen",
+        label: "Utilidad proyectada",
         value: formatCurrency(projectedProfit),
-        helper: "Proyeccion operativa derivada del punto de equilibrio.",
+        helper: "Proyeccion operativa para entender si el volumen estimado deja margen real.",
       },
     ];
   }, [moduleResults]);
@@ -353,21 +398,25 @@ function App() {
             <div className="max-w-3xl">
               <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/10 px-4 py-2 text-sm">
                 <Sparkles className="h-4 w-4" />
-                Decision intelligence for planning, finance and business scenarios
+                Stratify
               </div>
               <p className="text-sm font-semibold uppercase tracking-[0.3em] text-white/70">
-                Stratify
+                Decision intelligence for finance and business
               </p>
               <h1 className="font-display text-4xl leading-tight md:text-5xl">
-                Decision Engine for Finance &amp; Business
+                Toma decisiones financieras y de negocio con claridad
               </h1>
               <p className="mt-4 max-w-2xl text-base text-white/80 md:text-lg">
-                Stratify transforma numeros en decisiones claras para personas y negocios.
-                Analiza, simula y proyecta escenarios financieros con una vision estructurada y
-                profesional.
+                Analiza creditos, inversiones y escenarios antes de comprometer tu dinero.
               </p>
             </div>
             <div className="flex flex-wrap gap-3">
+              <a
+                href="/"
+                className="inline-flex items-center gap-2 rounded-2xl border border-white/15 bg-white/10 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-white/15"
+              >
+                Volver a la landing
+              </a>
               <Button
                 variant="secondary"
                 icon={<LayoutDashboard className="h-4 w-4" />}
@@ -381,7 +430,7 @@ function App() {
                 onClick={handleExportSummaryAnalysis}
                 disabled={isExporting}
               >
-                {isExporting ? "Exportando..." : "Exportar analisis general"}
+                {isExporting ? "Generando..." : "Descargar reporte para cliente"}
               </Button>
             </div>
           </div>
@@ -391,8 +440,8 @@ function App() {
           <DashboardSummary items={dashboardMetrics} />
 
           <SectionCard
-            title="Centro de Decision"
-            description="Selecciona un modulo para analizar escenarios financieros o evaluar decisiones de negocio."
+            title="Selecciona el frente de decision"
+            description="Elige un modulo para construir un analisis util, explicable y listo para compartir con cliente o equipo."
             actions={
               <ExportActions
                 onExportAnalysis={handleExportSummaryAnalysis}
@@ -411,7 +460,23 @@ function App() {
           <div className="grid gap-6 xl:grid-cols-[1.05fr_1.3fr]">
             <div className="space-y-6">
               <SectionCard
-                title={activeModule.name}
+                title="1. Informacion del cliente / analisis"
+                description="Primero define el contexto real de la decision para que el escenario tenga sentido consultivo."
+                accent={activeModule.accent}
+              >
+                <AnalysisContextForm
+                  value={activeAnalysisContext}
+                  onChange={(value) =>
+                    setAnalysisContext((current) => ({
+                      ...current,
+                      [activeModule.id]: value,
+                    }))
+                  }
+                />
+              </SectionCard>
+
+              <SectionCard
+                title="2. Inputs del escenario"
                 description={activeModule.description}
                 accent={activeModule.accent}
                 actions={
@@ -428,6 +493,10 @@ function App() {
                   </Button>
                 }
               >
+                <div className="mb-4 rounded-2xl border border-slate-200 bg-slate-50/70 px-4 py-3 text-sm text-slate-600">
+                  Captura los supuestos clave que definen el escenario. Mientras mas realistas sean,
+                  mas util sera la recomendacion final.
+                </div>
                 <div className="grid gap-4 md:grid-cols-2">
                   {activeModule.fields.map((field) => (
                     <InputField
@@ -441,24 +510,8 @@ function App() {
               </SectionCard>
 
               <SectionCard
-                title="Contexto del analisis"
-                description="Asocia el escenario con cliente, proyecto y lectura consultiva sin alterar el modelo financiero."
-                accent={activeModule.accent}
-              >
-                <AnalysisContextForm
-                  value={activeAnalysisContext}
-                  onChange={(value) =>
-                    setAnalysisContext((current) => ({
-                      ...current,
-                      [activeModule.id]: value,
-                    }))
-                  }
-                />
-              </SectionCard>
-
-              <SectionCard
-                title="Escenarios guardados"
-                description="Administra versiones guardadas por modulo para comparar decisiones sin perder capturas anteriores."
+                title="6. Acciones y seguimiento"
+                description="Guarda, actualiza y compara escenarios para sostener una recomendacion con contexto."
                 accent={activeModule.accent}
               >
                 <ScenarioManager
@@ -478,8 +531,8 @@ function App() {
               </SectionCard>
 
               <SectionCard
-                title="Comparacion de escenarios"
-                description="Contrasta dos escenarios del mismo modulo para identificar variaciones de costo, retorno y sostenibilidad."
+                title="Comparacion para decidir mejor"
+                description="Si comparas dos escenarios, Stratify destaca la alternativa mas conveniente de forma mas directa."
                 accent={activeModule.accent}
               >
                 <ScenarioComparison
@@ -491,8 +544,8 @@ function App() {
             </div>
 
             <SectionCard
-              title={activeResult.headline}
-              description={activeResult.status}
+              title="3. Resumen ejecutivo"
+              description="Lectura inicial del escenario para entender impacto, costo y conveniencia antes de profundizar."
               accent={activeModule.accent}
               actions={
                 <ExportActions
@@ -503,25 +556,36 @@ function App() {
                 />
               }
             >
-              <div className="space-y-5">
+              <div className="space-y-6">
                 <div className="rounded-3xl border border-slate-200 bg-slate-50/70 p-4">
                   <h4 className="font-display text-xl text-ink">Resumen Ejecutivo</h4>
                   <p className="mt-1 text-sm text-slate-600">
-                    Presentacion clara de metricas clave, totales, costos y resultados principales
-                    para tomar una decision con rapidez.
+                    Esta vista sintetiza los numeros relevantes y los convierte en una lectura mas
+                    util para tomar decisiones reales.
                   </p>
                 </div>
 
                 <MetricGrid items={activeResult.summary} />
-                <DetailList items={activeResult.details} />
 
-                <div className="rounded-3xl border border-teal/20 bg-teal/10 p-4">
-                  <h4 className="font-semibold text-teal">Conclusion automatica</h4>
-                  <p className="mt-2 text-sm text-slate-700">{activeConclusion}</p>
+                <div className="space-y-3">
+                  <div className="rounded-3xl border border-slate-200 bg-white p-4">
+                    <h4 className="font-semibold text-ink">4. Resultados detallados</h4>
+                    <p className="mt-1 text-sm text-slate-600">
+                      Aqui se explica el impacto economico del escenario con mayor detalle.
+                    </p>
+                  </div>
+                  <DetailList items={activeResult.details} />
+                </div>
+
+                <div className="space-y-3">
+                  <div className="rounded-3xl border border-teal/20 bg-teal/10 p-4">
+                    <h4 className="font-semibold text-teal">5. Conclusion recomendada</h4>
+                    <p className="mt-2 text-sm text-slate-700">{activeConclusion}</p>
+                  </div>
                 </div>
 
                 <div className="grid gap-3 rounded-3xl border border-slate-200 bg-slate-50/70 p-4">
-                  <h4 className="font-semibold text-ink">Resumen ejecutivo</h4>
+                  <h4 className="font-semibold text-ink">Lectura ejecutiva</h4>
                   {activeResult.insights.map((insight) => (
                     <p key={insight} className="text-sm text-slate-600">
                       {insight}
@@ -529,9 +593,19 @@ function App() {
                   ))}
                 </div>
 
-                {activeResult.tables?.map((table) => (
-                  <ResultTable key={table.title} table={table} />
-                ))}
+                {activeResult.tables?.length ? (
+                  <div className="space-y-3">
+                    <div className="rounded-3xl border border-slate-200 bg-white p-4">
+                      <h4 className="font-semibold text-ink">Resultados de soporte</h4>
+                      <p className="mt-1 text-sm text-slate-600">
+                        Tablas de apoyo para profundizar y respaldar la recomendacion.
+                      </p>
+                    </div>
+                    {activeResult.tables.map((table) => (
+                      <ResultTable key={table.title} table={table} />
+                    ))}
+                  </div>
+                ) : null}
               </div>
             </SectionCard>
           </div>

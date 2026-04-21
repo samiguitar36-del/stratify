@@ -13,6 +13,18 @@ const kindPrefix: Record<ModuleField["kind"], string> = {
   number: "#",
 };
 
+const getPlaceholder = (field: ModuleField) => {
+  if (field.kind === "currency") {
+    return "Ej. 500000";
+  }
+
+  if (field.kind === "percent") {
+    return "Ej. 12.5";
+  }
+
+  return "Ej. 24";
+};
+
 export function InputField({ field, value, onChange }: InputFieldProps) {
   const handleChange = (event: ChangeEvent<HTMLInputElement>) => {
     const nextValue = event.target.value === "" ? 0 : Number(event.target.value);
@@ -52,16 +64,15 @@ export function InputField({ field, value, onChange }: InputFieldProps) {
           onBlur={handleBlur}
           inputMode="decimal"
           aria-label={field.label}
-          className="w-full border-none bg-transparent text-base font-semibold text-ink outline-none"
+          placeholder={getPlaceholder(field)}
+          className="w-full border-none bg-transparent text-base font-semibold text-ink outline-none placeholder:text-slate-300"
         />
       </div>
       <div className="space-y-1">
         {field.helper ? <span className="block text-xs text-slate-500">{field.helper}</span> : null}
         {field.min !== undefined || field.max !== undefined ? (
           <span className="block text-[11px] text-slate-400">
-            Rango sugerido:
-            {" "}
-            {field.min ?? "sin minimo"} a {field.max ?? "sin maximo"}
+            Rango sugerido: {field.min ?? "sin minimo"} a {field.max ?? "sin maximo"}
           </span>
         ) : null}
       </div>

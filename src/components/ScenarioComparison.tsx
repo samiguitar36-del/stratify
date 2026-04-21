@@ -59,27 +59,116 @@ const badgeStyles = {
 };
 
 const badgeLabels = {
-  A: "Mejor A",
-  B: "Mejor B",
-  equal: "Empate",
+  A: "Mejor opcion",
+  B: "Mejor opcion",
+  equal: "Empate tecnico",
   none: "Referencia",
 };
 
-const ScenarioContextSummary = ({ scenario }: { scenario: SavedScenario }) => (
-  <div className="mt-3 grid gap-1 text-sm text-slate-600">
-    <p>
-      <span className="font-semibold text-ink">Cliente:</span>{" "}
-      {scenario.context.clientName || "Sin definir"}
+const getComparisonSignals = (comparison: ScenarioComparisonResult) => {
+  const decisiveMetric = comparison.metrics.find(
+    (metric) => metric.betterScenario === "A" || metric.betterScenario === "B",
+  );
+
+  const higherReturn = comparison.metrics.find((metric) => {
+    const label = metric.label.toLowerCase();
+    return (
+      (label.includes("roi") ||
+        label.includes("retorno") ||
+        label.includes("rentabilidad") ||
+        label.includes("utilidad")) &&
+      (metric.betterScenario === "A" || metric.betterScenario === "B")
+    );
+  });
+
+  const lowerCost = comparison.metrics.find((metric) => {
+    const label = metric.label.toLowerCase();
+    return (
+      (label.includes("interes") ||
+        label.includes("costo") ||
+        label.includes("pago") ||
+        label.includes("total pagado")) &&
+      (metric.betterScenario === "A" || metric.betterScenario === "B")
+    );
+  });
+
+  const higherRisk = comparison.metrics.find((metric) => {
+    const label = metric.label.toLowerCase();
+    return (
+      (label.includes("interes") || label.includes("costo financiero")) &&
+      (metric.betterScenario === "A" || metric.betterScenario === "B")
+    );
+  });
+
+  return [
+    decisiveMetric
+      ? {
+          label: "Mejor opcion",
+          value:
+            decisiveMetric.betterScenario === "A"
+              ? comparison.scenarioA.name
+              : comparison.scenarioB.name,
+        }
+      : null,
+    higherReturn
+      ? {
+          label: "Mayor retorno",
+          value:
+            higherReturn.betterScenario === "A"
+              ? comparison.scenarioA.name
+              : comparison.scenarioB.name,
+        }
+      : null,
+    lowerCost
+      ? {
+          label: "Menor costo",
+          value:
+            lowerCost.betterScenario === "A"
+              ? comparison.scenarioA.name
+              : comparison.scenarioB.name,
+        }
+      : null,
+    higherRisk
+      ? {
+          label: "Mayor riesgo",
+          value:
+            higherRisk.betterScenario === "A"
+              ? comparison.scenarioB.name
+              : comparison.scenarioA.name,
+        }
+      : null,
+  ].filter(Boolean) as Array<{ label: string; value: string }>;
+};
+
+const ScenarioContextSummary = ({
+  scenario,
+  highlight,
+}: {
+  scenario: SavedScenario;
+  highlight?: boolean;
+}) => (
+  <div
+    className={`rounded-3xl border p-5 ${highlight ? "border-teal/30 bg-teal/10" : "border-slate-200 bg-white"}`}
+  >
+    <p className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-500">
+      {highlight ? "Escenario recomendado" : "Escenario en revision"}
     </p>
-    <p>
-      <span className="font-semibold text-ink">Proyecto:</span>{" "}
-      {scenario.context.projectName || "Sin definir"}
-    </p>
-    {scenario.context.tags.length > 0 ? (
+    <h4 className="mt-2 font-display text-2xl text-ink">{scenario.name}</h4>
+    <div className="mt-3 grid gap-1 text-sm text-slate-600">
       <p>
-        <span className="font-semibold text-ink">Tags:</span> {scenario.context.tags.join(", ")}
+        <span className="font-semibold text-ink">Cliente:</span>{" "}
+        {scenario.context.clientName || "Sin definir"}
       </p>
-    ) : null}
+      <p>
+        <span className="font-semibold text-ink">Proyecto:</span>{" "}
+        {scenario.context.projectName || "Sin definir"}
+      </p>
+      {scenario.context.tags.length > 0 ? (
+        <p>
+          <span className="font-semibold text-ink">Tags:</span> {scenario.context.tags.join(", ")}
+        </p>
+      ) : null}
+    </div>
   </div>
 );
 
@@ -137,7 +226,7 @@ export function ScenarioComparison({
   if (comparisonIds.length < 2) {
     return (
       <div className="rounded-[28px] border border-dashed border-slate-300 bg-white/70 p-5 text-sm text-slate-500">
-        Selecciona dos escenarios guardados de este modulo para activar la comparacion ejecutiva.
+        Selecciona dos escenarios guardados para obtener una lectura comparativa con recomendacion.
       </div>
     );
   }
@@ -154,42 +243,41 @@ export function ScenarioComparison({
   }
 
   const comparison = buildScenarioComparison(moduleDefinition, scenarioA, scenarioB);
+  const signals = getComparisonSignals(comparison);
+  const preferredScenario =
+    comparison.metrics.find((metric) => metric.betterScenario === "A" || metric.betterScenario === "B")
+      ?.betterScenario ?? "equal";
 
   return (
     <div className="space-y-5">
       <div className="rounded-2xl border border-slate-200 bg-slate-50/70 px-4 py-3 text-xs text-slate-500">
-        La lectura compara los dos escenarios seleccionados y conserva la logica actual del
-        modulo.
+        Compara ambos escenarios con una lectura orientada a decision. Stratify resalta la opcion
+        mas conveniente segun costo, retorno y senales de riesgo disponibles.
       </div>
+
+      {signals.length > 0 ? (
+        <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-4">
+          {signals.map((signal) => (
+            <div key={signal.label} className="rounded-2xl border border-slate-200 bg-white p-4">
+              <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">
+                {signal.label}
+              </p>
+              <p className="mt-2 text-sm font-semibold text-ink">{signal.value}</p>
+            </div>
+          ))}
+        </div>
+      ) : null}
 
       <div className="grid gap-4 md:grid-cols-2">
-        <div className="rounded-3xl border border-slate-200 bg-white p-5">
-          <p className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-500">
-            Escenario A
-          </p>
-          <h4 className="mt-2 font-display text-2xl text-ink">{comparison.scenarioA.name}</h4>
-          <p className="mt-2 text-sm text-slate-600">
-            Referencia base para la comparacion ejecutiva del modulo actual.
-          </p>
-          <ScenarioContextSummary scenario={comparison.scenarioA} />
-        </div>
-        <div className="rounded-3xl border border-slate-200 bg-white p-5">
-          <p className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-500">
-            Escenario B
-          </p>
-          <h4 className="mt-2 font-display text-2xl text-ink">{comparison.scenarioB.name}</h4>
-          <p className="mt-2 text-sm text-slate-600">
-            Alternativa comparada para identificar variaciones de costo, retorno o riesgo.
-          </p>
-          <ScenarioContextSummary scenario={comparison.scenarioB} />
-        </div>
+        <ScenarioContextSummary scenario={comparison.scenarioA} highlight={preferredScenario === "A"} />
+        <ScenarioContextSummary scenario={comparison.scenarioB} highlight={preferredScenario === "B"} />
       </div>
 
-      <ComparisonTable title="Inputs relevantes" data={comparison.inputs} />
-      <ComparisonTable title="Resultados clave" data={comparison.metrics} />
+      <ComparisonTable title="Comparacion de inputs" data={comparison.inputs} />
+      <ComparisonTable title="Comparacion de resultados" data={comparison.metrics} />
 
       <div className="rounded-3xl border border-teal/20 bg-teal/10 p-5">
-        <h4 className="font-semibold text-teal">Conclusion comparativa</h4>
+        <h4 className="font-semibold text-teal">Lectura recomendada</h4>
         <p className="mt-2 text-sm text-slate-700">{comparison.conclusion}</p>
       </div>
     </div>
